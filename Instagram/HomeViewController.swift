@@ -106,6 +106,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         }
     }
     
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return postArray.count
     }
@@ -115,14 +116,17 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! PostTableViewCell
         cell.setPostData(postArray[indexPath.row])
         
-        // セル内のボタンのアクションをソースコードで設定する
-        cell.likeButton.addTarget(self, action:#selector(handleButton(_:forEvent:)), for: .touchUpInside)
+        // セル内のボタンのアクションをソースコードで設定する（追記：お気に入りボタンの）
+        cell.likeButton.addTarget(self, action:#selector(handleLikeButton(_:forEvent:)), for: .touchUpInside)
+        
+        //セル内のコメントボタンが押された時の処理
+        cell.commentButton.addTarget(self, action:#selector(handleCommentButton(_:forEvent:)), for: .touchUpInside)
         
         return cell
     }
     
-    // セル内のボタンがタップされた時に呼ばれるメソッド
-    @objc func handleButton(_ sender: UIButton, forEvent event: UIEvent) {
+    // セル内のボタンがタップされた時に呼ばれるメソッド（追記：お気に入りボタンの）
+    @objc func handleLikeButton(_ sender: UIButton, forEvent event: UIEvent) {
         print("DEBUG_PRINT: likeボタンがタップされました。")
         
         // タップされたセルのインデックスを求める
@@ -156,6 +160,25 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
             postRef.updateChildValues(likes)
             
         }
+    }
+    
+    //セル内のコメントボタンが押された時の処理
+    @objc func handleCommentButton(_ sender: UIButton, forEvent event: UIEvent) {
+        print("DEBUG_PRINT: commentボタンがタップされました。")
+        
+        // タップされたセルのインデックスを求める
+        let touch = event.allTouches?.first
+        let point = touch!.location(in: self.tableView)
+        let indexPath = tableView.indexPathForRow(at: point)
+        
+        // 配列からタップされたインデックスのデータを取り出す
+        let postData = postArray[indexPath!.row]
+        
+        //画面遷移
+        let commentViewController = self.storyboard?.instantiateViewController(withIdentifier: "Comment") as! CommentViewController
+        commentViewController.postData = postData
+        self.present(commentViewController, animated: true, completion: nil)
+    
     }
 
     override func didReceiveMemoryWarning() {
